@@ -1,0 +1,257 @@
+﻿@using TheSupportTicketSystem.Web.Utilities
+@model TheSupportTicketSystem.Web.Models.Ticket
+@{
+    ViewData["Title"] = "Ticket Details";
+}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-8">
+            <h5 class="display-7"> <i class="bi bi-window-fullscreen"></i> Ticket Details</h5>
+            <h6 class="display-8">TICKET-<strong>@Model.TicketId</strong></h6>
+            <h6 class="display-8"><strong>Title: @Model.Title</strong></h6>
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title display-8"><i class="bi bi-file-person"></i><strong>@EmailHelper.RemoveEmailDomain(@Model.CreatedBy.UserName)</strong> raised this request at @Model.CreatedDate</h6>
+                    <hr />
+                    <h5 class="display-9"><strong>Description</strong></h5>
+                    <p class="card-text"> <td>@Html.Raw(@Model.Description)</td></p>
+                </div>
+            </div>
+            <hr>
+
+            <div class="card">
+                <div class="card-header">
+                 <h5 class="display-9"><strong>Comments</strong></h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var comment in Model.Comments)
+                    {
+                        <div class="media mb-3">
+                            <div class="media-body">
+                                <h5 class="mt-0">@EmailHelper.RemoveEmailDomain(@comment.User.UserName)</h5>
+                                <p>@Html.Raw(comment.Text)</p>
+                                <p class="text-muted">@DateTimeExtensions.TimeAgo(@comment.CreatedDate)</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (User.IsInRole("Client User") || User.IsInRole("Support Team User"))
+            {
+                <div class="card mt-3">
+                
+                    <div class="card-body">
+                        <form asp-action="AddComment" method="post">
+                            <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                            <div class="form-group">
+                                <label for="commentText">Comment:</label>
+                                <textarea name="commentText" class="form-control" id="comment-editor"></textarea>
+
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Add Comment</button>
+                        </form>
+                    </div>
+                </div>
+            }
+            <div class="accordion accordion-flush" id="accordionFlushHistroy">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                            History
+                        </button>
+                    </h2>
+                    <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushHistroy">
+                        @foreach (var history in Model.Histories)
+                        {
+                            <h6 class="card-title display-8 text-primary mt-2 "><i class="bi bi-file-person"></i><strong class="text-primary mt-2"> @history.User.UserName</strong>  at @history.ChangeDate</h6>
+                            <p class="mt-2">@history.Description</p>
+                        }
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="col-4">
+            <h6 class="display-8"><strong>Status</strong></h6>
+            <h6 class="display-8"><mark>@Model.Status </mark></h6>
+            <h6 class="display-8"><strong>Status</strong></h6>
+            @if (User.IsInRole("Support Team User"))
+            {
+                <form asp-action="ChangeStatus" method="post">
+                    <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                    <div class="form-group">
+                        <select name="newStatus" class="form-select form-control mb-2">
+                        <option value="">-- Select Status --</option>
+                        <option value="Open">Open</option>
+                            <option value="InProgress">In Progress</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-primary">Change Status</button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <h6 class="display-8"><mark>@Model.Status</mark></h6>
+            }
+
+            <h6 class="display-8 mt-3"><strong>Assignee</strong></h6>
+            <h6 class="display-8">@EmailHelper.RemoveEmailDomain(@Model.AssignedTo.UserName)</h6>
+            @if (User.IsInRole("Support Team User"))
+            {
+                <div class="card mt-3">
+                   
+                    <div class="card-body">
+                        <form asp-action="AssignTicket" method="post">
+                            <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                            <div class="form-group">
+                                <label class="mb-2"  for="assignedToId">Assign To:</label>
+                                <select name="assignedToId" asp-items="ViewBag.SupportTeamUsers" class="form-select form-control"></select>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">Assign</button>
+                        </form>
+                    </div>
+                </div>
+            }
+            <h6 class="display-8 mt-3"><strong>Reporter</strong></h6>
+            <h6 class="display-8">@EmailHelper.RemoveEmailDomain(@Model.CreatedBy.UserName)</h6>
+            <h6 class="display-8"><strong>Priority</strong></h6>
+            <h6 class="display-8">@Model.Priority </></h6>
+            @if (User.IsInRole("Support Team User"))
+            {
+                <form asp-action="ChangePriority" method="post">
+                    <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                    <div class="form-group">
+                        <select name="newPriority" class="form-select form-control mb-2">
+                            <option value="">-- Select Priority --</option>
+                            <option value="Low">Low</option>
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-primary">Change Priority</button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <h6 class="display-8"><mark>@Model.Priority</mark></h6>
+            }
+            <h6 class="display-8 mt-3"><strong>Created at</strong></h6>
+            <h6 class="display-8">@DateTimeExtensions.TimeAgo(@Model.CreatedDate) </></h6>
+            <h6 class="display-8"><strong>Last Activity</strong></h6>
+            <h6 class="display-8"> @DateTimeExtensions.TimeAgo(@Model.LastActivity)  </></h6>
+            <p>
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWidthExample" aria-expanded="false" aria-controls="collapseWidthExample">
+                    Followers <span class="badge text-bg-secondary">@Model.Followers.Count</span>
+                </button>
+            </p>
+            <div style="min-height: 120px;">
+                <div class="collapse collapse-horizontal" id="collapseWidthExample">
+                    <div class="card card-body" style="width: 420px;">
+                        @foreach (var follower in Model.Followers)
+                        {
+                            <p><i class="bi bi-person-fill"></i> @follower.User.UserName</p>
+                        }
+                    </div>
+                    @if (User.IsInRole("Support Team User"))
+                    {
+                        <div class="mt-3">
+                            @if (ViewBag.IsFollowing)
+                            {
+                                <form asp-action="UnfollowTicket" asp-route-ticketId="@Model.TicketId" method="post">
+                                    <button type="submit" class="btn btn-warning">Unfollow</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="FollowTicket" asp-route-ticketId="@Model.TicketId" method="post">
+                                    <button type="submit" class="btn btn-primary">Follow</button>
+                                </form>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+           
+           
+        </div>
+        <div>
+            <div class="mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.TicketId" class="btn btn-info">Edit</a>
+                @if (User.IsInRole("Support Team User"))
+                {
+                    <a asp-action="Index">Back to List</a>
+                }
+                else
+                {
+                    <a href="@Url.Action("ClientDashboard", "Dashboard")" class="btn btn-secondary">Back to List</a>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.ckeditor.com/ckeditor5/34.1.0/classic/ckeditor.js"></script>
+<script>
+    class MyUploadAdapter {
+        constructor(loader) {
+            this.loader = loader;
+        }
+
+        upload() {
+            return this.loader.file
+                .then(file => {
+                    return new Promise((resolve, reject) => {
+                        const data = new FormData();
+                        data.append('upload', file);
+
+                        // Update this URL to the path of your upload action
+                        const uploadUrl = '/Ticket/UploadImage';
+
+                        fetch(uploadUrl, {
+                            method: 'POST',
+                            body: data
+                        })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.url) {
+                                    resolve({
+                                        default: result.url
+                                    });
+                                } else {
+                                    reject('Upload failed');
+                                }
+                            })
+                            .catch(error => {
+                                reject('Upload failed: ' + error.message);
+                            });
+                    });
+                });
+        }
+    }
+
+    function MyCustomUploadAdapterPlugin(editor) {
+        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+            return new MyUploadAdapter(loader);
+        };
+    }
+
+    ClassicEditor
+        .create(document.querySelector('#description-editor'), {
+            extraPlugins: [MyCustomUploadAdapterPlugin],
+            // ... other configuration
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+</script>

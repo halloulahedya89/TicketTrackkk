@@ -1,0 +1,40 @@
+﻿@using TheSupportTicketSystem.Web.Utilities
+@model List<Ticket>
+
+@if (Model.Any())
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Created Date</th>
+            <th></th>
+          
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var ticket in Model)
+        {
+            <tr>
+                <td>@ticket.Title</td>
+                <td>@Html.Raw(@ticket.Description)</td>
+                <td>@ticket.Status</td>
+                    <td>@DateTimeExtensions.TimeAgo(ticket.CreatedDate)</td>
+                <td>
+                        <a asp-action="Edit" asp-controller="Ticket" asp-route-id="@ticket.TicketId">Edit</a> |
+                        <a asp-action="Details" asp-controller="Ticket" asp-route-id="@ticket.TicketId">Details</a> 
+                      
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>You have not created any tickets.</p>
+}
+
+<a href="@Url.Action("Create","Ticket")">Create New Ticket</a>

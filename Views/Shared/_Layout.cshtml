@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - The Support Ticket System Web Application</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+   <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TheSupportTicketSystem.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <script src="https://cdn.ckeditor.com/ckeditor5/34.1.0/classic/ckeditor.js"></script>
+
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">The Support Ticket System</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        @if (User.IsInRole("Support Team User"))
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Ticket" asp-action="Index">All Ticket List  <span class="badge rounded-pill bg-danger" id="ticketCount">0</span> </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="MyDashboard">The Tickets I Created</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="MySupportDashboard">The Tickets Assigned To Me</a>
+                        </li>
+                        }
+                    </ul>
+                    <partial name="_LoginPartial"/>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - The Support Ticket System Web Application - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script>
+        function updateTicketCount() {
+            fetch('/Ticket/GetTicketCount')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('ticketCount').innerText = data;
+                })
+                .catch(error => console.error('Unable to get ticket count.', error));
+        }
+
+        // Initialize ticket count on page load
+        updateTicketCount();
+
+        // Update the ticket count every 1 seconds
+        setInterval(updateTicketCount, 1000);
+    </script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/34.1.0/classic/ckeditor.js"></script>
+
+    <script src="https://cdn.ckeditor.com/ckeditor5/34.1.0/classic/ckeditor.js"></script>
+    <script>
+        class MyUploadAdapter {
+            constructor(loader) {
+                this.loader = loader;
+            }
+
+            upload() {
+                return this.loader.file
+                    .then(file => {
+                        return new Promise((resolve, reject) => {
+                            const data = new FormData();
+                            data.append('upload', file);
+
+                            // Update this URL to the path of your upload action
+                            const uploadUrl = '/Ticket/UploadImage';
+
+                            fetch(uploadUrl, {
+                                method: 'POST',
+                                body: data
+                            })
+                                .then(response => response.json())
+                                .then(result => {
+                                    if (result.url) {
+                                        resolve({
+                                            default: result.url
+                                        });
+                                    } else {
+                                        reject('Upload failed');
+                                    }
+                                })
+                                .catch(error => {
+                                    reject('Upload failed: ' + error.message);
+                                });
+                        });
+                    });
+            }
+        }
+
+        function MyCustomUploadAdapterPlugin(editor) {
+            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                return new MyUploadAdapter(loader);
+            };
+        }
+
+        ClassicEditor
+            .create(document.querySelector('#description-editor'), {
+                extraPlugins: [MyCustomUploadAdapterPlugin],
+                // ... other configuration
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+    </script>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

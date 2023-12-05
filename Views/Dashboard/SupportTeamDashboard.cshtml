@@ -1,0 +1,57 @@
+﻿@using TheSupportTicketSystem.Web.Utilities
+@model IEnumerable<TheSupportTicketSystem.Web.Models.Ticket>
+
+
+<div class="">
+    
+    <div class="row">
+     
+
+            <h4>Tickets</h4>
+        <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Title Number</th>
+
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Assignee</th>
+                    <th>Created Date</th>
+                    <th>Last Activity</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.TicketId)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                        <td>@Html.Raw(@item.Description)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Priority)</td>
+                        <td>@EmailHelper.RemoveEmailDomain(@item.AssignedTo.UserName)</td>
+                        <td>@DateTimeExtensions.TimeAgo(@item.CreatedDate)</td>
+                        <td>@DateTimeExtensions.TimeAgo(@item.LastActivity)</td>
+                        <td>
+                            <a asp-action="Edit" asp-controller="Ticket" asp-route-id="@item.TicketId">Edit</a> |
+                            <a asp-action="Details" asp-controller="Ticket" asp-route-id="@item.TicketId">Details</a> |
+                            <a asp-action="Delete" asp-controller="Ticket" asp-route-id="@item.TicketId">Delete</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+
+            </table>
+
+        
+     
+    </div>
+
+</div>
+
+
+
+<a href="@Url.Action("Create","Ticket")">Create New Ticket</a>

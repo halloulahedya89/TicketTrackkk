@@ -1,0 +1,61 @@
+﻿@using TheSupportTicketSystem.Web.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@if (SignInManager.IsSignedIn(User))
+{
+    if (User.IsInRole("Support Team User"))
+    {
+       
+
+        
+        <div id="intro-example" class="p-5 text-center bg-image">
+          
+            <div class="mask" >
+                <div class="d-flex justify-content-center align-items-center h-100">
+                    <div class="text-primary">
+                        <h1 class="mb-3">THE SUPPORT TICKET SYSTEM</h1>
+                        <h5 class="mb-4">
+                            Support Team Dashboard
+                        </h5>
+                        <a class="btn btn-primary btn-lg m-2" href="@Url.Action("SupportTeamDashboard", "Dashboard")"
+                           role="button" rel="nofollow">Access</a>
+                        <a class="btn btn-success btn-lg m-2" href="@Url.Action("Create", "Ticket")"
+                           role="button">CREATE A TICKET</a>
+                      
+                        <a class="btn btn-secondary btn-lg m-2" id="register" asp-area="Identity" asp-page="/Account/Register">Add New User</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    }
+    else if (User.IsInRole("Client User"))
+    {
+       
+        <div id="intro-example" class="p-5 text-center bg-image">
+          
+            <div class="mask" >
+                <div class="d-flex justify-content-center align-items-center h-100">
+                    <div class="text-primary">
+                        <h1 class="mb-3">THE SUPPORT TICKET SYSTEM</h1>
+                        <h5 class="mb-4">
+                            My Dashboard
+                        </h5>
+                        <a class="btn btn-primary btn-lg m-2" href="@Url.Action("ClientDashboard", "Dashboard")"
+                           role="button" rel="nofollow" target="_blank">Access</a>
+                        <a class="btn btn-secondary btn-lg m-2" href="@Url.Action("Create", "Ticket")"
+                           target="_blank" role="button">CREATE A TICKET</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

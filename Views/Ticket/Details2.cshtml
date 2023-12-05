@@ -1,0 +1,106 @@
+﻿@model TheSupportTicketSystem.Web.Models.Ticket
+
+<h2>Ticket Details</h2>
+
+<div>
+    <h4>Ticket</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Ticket Number</dt>
+        <dd class="col-sm-10">@Model.TicketId</dd>
+        <dt class="col-sm-2">Title</dt>
+        <dd class="col-sm-10">@Model.Title</dd>
+        <dt class="col-sm-2">Description</dt>
+        <dd class="col-sm-10">@Model.Description</dd>
+        <dt class="col-sm-2">Status</dt>
+        <dd class="col-sm-10">@Model.Status</dd>
+        <dt class="col-sm-2">Created Date</dt>
+        <dd class="col-sm-10">@Model.CreatedDate</dd>
+        <dt class="col-sm-2">Last Activity</dt>
+        <dd class="col-sm-10">@Model.LastActivity</dd>
+        <dt class="col-sm-2">Created By</dt>
+        <dd class="col-sm-10">@Model.CreatedBy.UserName</dd>
+        <dt class="col-sm-2">Priority</dt>
+        <dd class="col-sm-10">@Model.Priority</dd>
+
+        <dt class="col-sm-2">Assigned To</dt>
+        <dd class="col-sm-10">@Model.AssignedTo.UserName</dd>
+
+        <dt class="col-sm-2">Followers</dt>
+        <dd class="col-sm-10">
+            @foreach (var follower in Model.Followers)
+            {
+                <p>@follower.User.UserName</p>
+            }
+        </dd>
+
+    </dl>
+</div>
+
+@if (User.IsInRole("Support Team User"))
+{
+    if (ViewBag.IsFollowing)
+    {
+        <form asp-action="UnfollowTicket" asp-route-ticketId="@Model.TicketId" method="post">
+            <button type="submit" class="btn btn-warning">Unfollow</button>
+        </form>
+    }
+    else
+    {
+        <form asp-action="FollowTicket" asp-route-ticketId="@Model.TicketId" method="post">
+            <button type="submit" class="btn btn-primary">Follow</button>
+        </form>
+    }
+}
+
+
+<h2>History</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Change Description</th>
+        <th>Changed By</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var history in Model.Histories)
+    {
+        <tr>
+            <td>@history.ChangeDate.ToString("g")</td>
+            <td>@history.Description</td>
+            <td>@history.User.UserName</td> <!-- Modify as needed to display user name -->
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (User.IsInRole("Support Team User"))
+{
+    <form asp-action="AssignTicket" method="post">
+        <input type="hidden" name="ticketId" value="@Model.TicketId" />
+        <select name="assignedToId" asp-items="ViewBag.SupportTeamUsers"></select>
+        <button type="submit">Assign</button>
+    </form>
+}
+
+
+@if (User.IsInRole("Client User") || User.IsInRole("Support Team User"))
+{
+    <form asp-action="AddComment" method="post">
+        <input type="hidden" name="ticketId" value="@Model.TicketId" />
+        <textarea name="commentText"></textarea>
+        <button type="submit">Add Comment</button>
+    </form>
+}
+
+@foreach (var comment in Model.Comments)
+{
+    <p>@comment.Text</p>
+    <p>Posted by: @comment.User.UserName on @comment.CreatedDate</p>
+    <!-- Other comment details -->
+}
+
+<a asp-action="Edit" asp-route-id="@Model.TicketId">Edit</a> |
+<a asp-action="Index">Back to List</a>
